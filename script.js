@@ -13,8 +13,11 @@ function updateTampilan() {
     tbody.innerHTML = '';
     let saldo = 0;
 
+    // Urutkan transaksi (opsional: yang terbaru di atas)
+    const dataTerbalik = [...transaksi].reverse();
+
     // Loop data transaksi untuk dimasukkan ke tabel
-    transaksi.forEach((item) => {
+    dataTerbalik.forEach((item) => {
         const row = document.createElement('tr');
         
         let simbol = item.jenis === 'pemasukan' ? '+' : '-';
@@ -46,44 +49,52 @@ function updateTampilan() {
 
 // 3. Fungsi Tambah Transaksi
 function tambahTransaksi() {
-    // Ambil elemen input berdasarkan ID di HTML
     const inputKet = document.getElementById('keterangan');
     const inputNom = document.getElementById('nominal');
     const inputJen = document.getElementById('jenis');
 
-    // Ambil nilainya dan bersihkan spasi
     const ket = inputKet.value.trim();
     const nom = parseInt(inputNom.value);
     const jen = inputJen.value;
 
-    // Validasi: Keterangan tidak boleh kosong, Nominal harus angka > 0
+    // Validasi input
     if (ket === "" || isNaN(nom) || nom <= 0) {
-        alert("Waduh, isi keterangan dan nominal dengan benar dulu ya!");
+        alert("Harap isi keterangan dan nominal dengan benar!");
         return;
     }
 
-    // Masukkan data baru ke dalam array
+    // Masukkan data baru
     transaksi.push({
         keterangan: ket,
         nominal: nom,
-        jenis: jen
+        jenis: jen,
+        tanggal: new Date().toLocaleDateString('id-ID') // Menambah data tanggal otomatis
     });
 
-    // Update UI dan simpan data
     updateTampilan();
 
-    // Kosongkan kembali form input
+    // Kosongkan form
     inputKet.value = '';
     inputNom.value = '';
+    inputKet.focus(); // Fokus kembali ke input keterangan
 }
 
-// 4. Fungsi Hapus Semua Data
+// 4. Fungsi Cetak Laporan (PDF)
+function cetakLaporan() {
+    if (transaksi.length === 0) {
+        alert("Tidak ada data yang bisa dicetak!");
+        return;
+    }
+    window.print();
+}
+
+// 5. Fungsi Hapus Semua Data
 function hapusSemua() {
-    if (confirm("Serius mau hapus semua riwayat keuangan?")) {
+    if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat transaksi?")) {
         transaksi = [];
         updateTampilan();
     }
 }
 
-// Jalankan updateTampilan saat halaman pertama kali dibuka
-window.addEventListener('DOMContentLoaded', updateTampilan);
+// Jalankan fungsi saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', updateTampilan);
