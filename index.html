@@ -3,122 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catatan Keuangan Simpel</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        button:hover { background-color: #218838; }
-        .summary { display: flex; justify-content: space-between; margin-top: 20px; font-weight: bold; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        th, td { border-bottom: 1px solid #ddd; padding: 10px; text-align: left; }
-        .status-pemasukan { color: green; }
-        .status-pengeluaran { color: red; }
-    </style>
+    <title>Catatan Keuangan - My Money</title>
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h2>Catatan Keuangan</h2>
-    
-    <div class="form-group">
-        <label>Keterangan</label>
-        <input type="text" id="keterangan" placeholder="Contoh: Beli Makan Siang">
+    <div class="container">
+        <h2>Catatan Keuangan</h2>
+        
+        <div class="form-section">
+            <div class="form-group">
+                <label for="keterangan">Keterangan</label>
+                <input type="text" id="keterangan" placeholder="Misal: Beli Seblak Madit" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nominal">Nominal (Rp)</label>
+                <input type="number" id="nominal" placeholder="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="jenis">Jenis Transaksi</label>
+                <select id="jenis">
+                    <option value="pemasukan">Pemasukan (+)</option>
+                    <option value="pengeluaran">Pengeluaran (-)</option>
+                </select>
+            </div>
+
+            <button class="btn-add" onclick="tambahTransaksi()">Tambah Transaksi</button>
+        </div>
+
+        <div class="summary">
+            <span>Total Saldo Saat Ini:</span>
+            <span id="total-saldo">Rp 0</span>
+        </div>
+
+        <div class="history-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Keterangan</th>
+                        <th>Nominal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <button class="btn-delete" onclick="hapusSemua()">Hapus Semua Riwayat</button>
     </div>
-    <div class="form-group">
-        <label>Nominal (Rp)</label>
-        <input type="number" id="nominal" placeholder="0">
-    </div>
-    <div class="form-group">
-        <label>Jenis</label>
-        <select id="jenis">
-            <option value="pemasukan">Pemasukan (+)</option>
-            <option value="pengeluaran">Pengeluaran (-)</option>
-        </select>
-    </div>
-    <button onclick="tambahTransaksi()">Tambah Transaksi</button>
 
-    <div class="summary">
-        <span>Total Saldo:</span>
-        <span id="total-saldo">Rp 0</span>
-    </div>
-
-    <table id="tabel-transaksi">
-        <thead>
-            <tr>
-                <th>Keterangan</th>
-                <th>Nominal</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
-    <button onclick="hapusSemua()" style="background-color: #dc3545; margin-top: 20px;">Hapus Semua Data</button>
-</div>
-
-<script>
-    let transaksi = JSON.parse(localStorage.getItem('dataKeuangan')) || [];
-
-    function updateTampilan() {
-        const tbody = document.querySelector('#tabel-transaksi tbody');
-        const totalElement = document.getElementById('total-saldo');
-        tbody.innerHTML = '';
-        let saldo = 0;
-
-        transaksi.forEach((item, index) => {
-            const row = tbody.insertRow();
-            const cellKet = row.insertCell(0);
-            const cellNom = row.insertCell(1);
-
-            cellKet.innerText = item.keterangan;
-            
-            if (item.jenis === 'pemasukan') {
-                cellNom.innerText = `+ Rp ${item.nominal.toLocaleString()}`;
-                cellNom.className = 'status-pemasukan';
-                saldo += item.nominal;
-            } else {
-                cellNom.innerText = `- Rp ${item.nominal.toLocaleString()}`;
-                cellNom.className = 'status-pengeluaran';
-                saldo -= item.nominal;
-            }
-        });
-
-        totalElement.innerText = `Rp ${saldo.toLocaleString()}`;
-        localStorage.setItem('dataKeuangan', JSON.stringify(transaksi));
-    }
-
-    function tambahTransaksi() {
-        const ket = document.getElementById('keterangan').value;
-        const nom = parseInt(document.getElementById('nominal').value);
-        const jen = document.getElementById('jenis').value;
-
-        if (ket === '' || isNaN(nom)) {
-            alert("Harap isi keterangan dan nominal dengan benar!");
-            return;
-        }
-
-        transaksi.push({ keterangan: ket, nominal: nom, jenis: jen });
-        updateTampilan();
-
-        // Reset Form
-        document.getElementById('keterangan').value = '';
-        document.getElementById('nominal').value = '';
-    }
-
-    function hapusSemua() {
-        if (confirm("Hapus semua riwayat?")) {
-            transaksi = [];
-            updateTampilan();
-        }
-    }
-
-    // Jalankan tampilan saat pertama kali buka
-    updateTampilan();
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
