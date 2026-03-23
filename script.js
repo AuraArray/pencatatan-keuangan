@@ -1,83 +1,80 @@
-// 1. Inisialisasi data dari LocalStorage atau array kosong jika belum ada data
+// Mengambil data dari localStorage saat halaman dimuat
 let transaksi = JSON.parse(localStorage.getItem('dataKeuangan')) || [];
 
-// 2. Fungsi untuk memperbarui tampilan tabel dan saldo
+// Fungsi untuk menampilkan data ke tabel
 function updateTampilan() {
-    const tbody = document.querySelector('#tabel-transaksi tbody');
+    const tbody = document.querySelector('table tbody');
     const totalElement = document.getElementById('total-saldo');
     
-    // Kosongkan tabel sebelum diisi ulang
+    // Bersihkan tabel
     tbody.innerHTML = '';
     let saldo = 0;
 
-    // Iterasi setiap data transaksi
-    transaksi.forEach((item, index) => {
-        const row = tbody.insertRow();
+    // Susun ulang baris tabel
+    transaksi.forEach((item) => {
+        const row = document.createElement('tr');
         
-        // Buat kolom Keterangan
-        const cellKet = row.insertCell(0);
-        cellKet.innerText = item.keterangan;
+        let warnaKelas = item.jenis === 'pemasukan' ? 'text-success' : 'text-danger';
+        let simbol = item.jenis === 'pemasukan' ? '+' : '-';
         
-        // Buat kolom Nominal
-        const cellNom = row.insertCell(1);
+        row.innerHTML = `
+            <td>${item.keterangan}</td>
+            <td style="color: ${item.jenis === 'pemasukan' ? '#28a745' : '#ea4335'}; font-weight: bold;">
+                ${simbol} Rp ${parseInt(item.nominal).toLocaleString('id-ID')}
+            </td>
+        `;
         
-        // Logika perhitungan saldo dan pewarnaan teks
+        tbody.appendChild(row);
+
+        // Hitung Saldo
         if (item.jenis === 'pemasukan') {
-            cellNom.innerText = `+ Rp ${item.nominal.toLocaleString('id-ID')}`;
-            cellNom.style.color = '#28a745'; // Hijau
-            saldo += item.nominal;
+            saldo += parseInt(item.nominal);
         } else {
-            cellNom.innerText = `- Rp ${item.nominal.toLocaleString('id-ID')}`;
-            cellNom.style.color = '#dc3545'; // Merah
-            saldo -= item.nominal;
+            saldo -= parseInt(item.nominal);
         }
     });
 
-    // Update total saldo di layar
+    // Update angka saldo di layar
     totalElement.innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
     
-    // Simpan data terbaru ke LocalStorage
+    // Simpan ke memori browser
     localStorage.setItem('dataKeuangan', JSON.stringify(transaksi));
 }
 
-// 3. Fungsi untuk menambah transaksi baru
+// Fungsi yang dipanggil tombol "Tambah Transaksi"
 function tambahTransaksi() {
-    const ketInput = document.getElementById('keterangan');
-    const nomInput = document.getElementById('nominal');
-    const jenInput = document.getElementById('jenis');
+    const ket = document.getElementById('keterangan').value;
+    const nom = document.getElementById('nominal').value;
+    const jen = document.getElementById('jenis').value;
 
-    const ket = ketInput.value;
-    const nom = parseInt(nomInput.value);
-    const jen = jenInput.value;
-
-    // Validasi input
-    if (ket.trim() === '' || isNaN(nom) || nom <= 0) {
-        alert("Harap masukkan keterangan dan nominal yang valid!");
+    // Validasi sederhana
+    if (ket === "" || nom === "" || nom <= 0) {
+        alert("Isi keterangan dan nominal dengan benar ya!");
         return;
     }
 
-    // Masukkan data ke array
+    // Tambah ke array
     transaksi.push({
         keterangan: ket,
-        nominal: nom,
+        nominal: parseInt(nom),
         jenis: jen
     });
 
-    // Perbarui UI
+    // Perbarui layar
     updateTampilan();
 
-    // Reset form input
-    ketInput.value = '';
-    nomInput.value = '';
+    // Kosongkan form setelah input
+    document.getElementById('keterangan').value = '';
+    document.getElementById('nominal').value = '';
 }
 
-// 4. Fungsi untuk menghapus semua data
+// Fungsi yang dipanggil tombol "Hapus Semua"
 function hapusSemua() {
-    if (confirm("Apakah Anda yakin ingin menghapus semua riwayat transaksi?")) {
+    if (confirm("Yakin mau hapus semua catatan?")) {
         transaksi = [];
         updateTampilan();
     }
 }
 
-// Panggil fungsi tampilan saat halaman pertama kali dimuat
-document.addEventListener('DOMContentLoaded', updateTampilan);
+// Jalankan fungsi update saat halaman pertama kali dibuka
+window.onload = updateTampilan;
